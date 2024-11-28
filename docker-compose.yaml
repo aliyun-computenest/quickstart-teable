@@ -2,43 +2,43 @@ version: '3.9'
 
 services:
   teable:
-    image: registry.cn-shenzhen.aliyuncs.com/teable/teable:latest
+    image: ghcr.io/teableio/teable:latest
     restart: always
     ports:
       - '3000:3000'
     volumes:
       - teable-data:/app/.assets:rw
+      # you may use a bind-mounted host directory instead,
+      # so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/teable/data:/app/.assets:rw
     env_file:
       - .env
     environment:
+      - TZ=${TIMEZONE}
       - NEXT_ENV_IMAGES_ALL_REMOTE=true
     networks:
-      - teable
+      - teable-standalone
     depends_on:
       teable-db-migrate:
         condition: service_completed_successfully
-      teable-cache:
-        condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
-      start_period: 5s
-      interval: 5s
-      timeout: 3s
-      retries: 3
 
   teable-db:
-    image: registry.cn-shenzhen.aliyuncs.com/teable/postgres:15.4
+    image: postgres:15.4
     restart: always
     ports:
       - '42345:5432'
     volumes:
       - teable-db:/var/lib/postgresql/data:rw
+      # you may use a bind-mounted host directory instead,
+      # so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/db/data:/var/lib/postgresql/data:rw
     environment:
+      - TZ=${TIMEZONE}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
-      - teable
+      - teable-standalone
     healthcheck:
       test: ['CMD-SHELL', "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
       interval: 10s
@@ -46,20 +46,21 @@ services:
       retries: 3
 
   teable-db-migrate:
-    image: registry.cn-shenzhen.aliyuncs.com/teable/teable-db-migrate:latest
+    image: ghcr.io/teableio/teable-db-migrate:latest
     environment:
+      - TZ=${TIMEZONE}
       - PRISMA_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     networks:
-      - teable
+      - teable-standalone
     depends_on:
       teable-db:
         condition: service_healthy
 
 networks:
-  teable:
-    name: teable-network
+  teable-standalone:
+    name: teable-standalone-network
+    driver: bridge
 
 volumes:
-  teable-db: {}
   teable-data: {}
-  teable-cache: {}
+  teable-db: {}
