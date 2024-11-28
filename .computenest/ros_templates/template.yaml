@@ -199,11 +199,6 @@ Parameters:
     AssociationProperty: ALIYUN::ECS::Instance::Password
     Label: PostgresPassword
     NoEcho: True
-  REDIS_PASSWORD:
-    Type: String
-    AssociationProperty: ALIYUN::ECS::Instance::Password
-    Label: RedisPassword
-    NoEcho: True
 Resources:
   # 新建vpc
   EcsVpc:
@@ -319,7 +314,6 @@ Resources:
             systemctl enable quickstart-teable
 
             sed -i 's/POSTGRES_PASSWORD=[^\n]*/POSTGRES_PASSWORD=${POSTGRES_PASSWORD}/' /root/application/docker_compose/.env
-            sed -i 's/REDIS_PASSWORD=[^\n]*/REDIS_PASSWORD=${REDIS_PASSWORD}/' /root/application/docker_compose/.env
             systemctl start quickstart-teable
           - RegionId:
               Ref: ALIYUN::Region
@@ -375,7 +369,6 @@ Metadata:
           default: 可用区配置
       - Parameters:
           - POSTGRES_PASSWORD
-          - REDIS_PASSWORD
         Label:
           en: Software Configuration
           zh-cn: 软件配置
