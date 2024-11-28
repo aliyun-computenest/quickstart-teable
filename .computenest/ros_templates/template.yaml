@@ -129,6 +129,17 @@ Parameters:
         InstanceTypeFamily:
           - ecs.u1
           - ecs.e
+        Memory:
+          - 4
+          - 8
+          - 12
+          - 16
+          - 24
+          - 32
+          - 48
+          - 64
+          - 96
+          - 128
   InstancePassword:
     NoEcho: true
     Type: String
@@ -194,11 +205,22 @@ Parameters:
           Fn::Equals:
             - ExistingVPC
             - ${VpcOption}
-  POSTGRES_PASSWORD:
+  PostgresPassword:
     Type: String
     AssociationProperty: ALIYUN::ECS::Instance::Password
-    Label: PostgresPassword
     NoEcho: True
+    Description:
+      en: Postgres Password, Length 8-30, must contain three(Capital letters, lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;'<>,.?/ Special symbol in)
+      zh-cn: Postgres 登录密码, 用户名为teable, 长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;'<>,.?/ 中的特殊符号）
+    AllowedPattern: '^[a-zA-Z0-9-\(\)\`\~\!\@\#\$\%\^\&\*\_\-\+\=\|\{\}\[\]\:\;\<\>\,\.\?\/]*$'
+    Label:
+      en: Postgres Password
+      zh-cn: Postgres登录密码
+    ConstraintDescription:
+      en: Length 8-30, must contain three(Capital letters, lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;'<>,.?/ Special symbol in)
+      zh-cn: 长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;'<>,.?/ 中的特殊符号）
+    MinLength: 8
+    MaxLength: 30
 Resources:
   # 新建vpc
   EcsVpc:
@@ -233,11 +255,6 @@ Resources:
           - Ref: EcsVpc
           - Ref: VpcId
       SecurityGroupIngress:
-        - PortRange: 42345/42345
-          Priority: 1
-          SourceCidrIp: 0.0.0.0/0
-          IpProtocol: tcp
-          NicType: internet
         - PortRange: 3000/3000
           Priority: 1
           SourceCidrIp: 0.0.0.0/0
@@ -282,8 +299,8 @@ Resources:
     Properties:
       InstanceIds:
         Fn::GetAtt:
-        - InstanceGroup
-        - InstanceIds
+          - InstanceGroup
+          - InstanceIds
       Type: RunShellScript
       Sync: true
       Timeout: 3600
@@ -313,31 +330,18 @@ Resources:
 
             systemctl enable quickstart-teable
 
-            sed -i 's/POSTGRES_PASSWORD=[^\n]*/POSTGRES_PASSWORD=${POSTGRES_PASSWORD}/' /root/application/docker_compose/.env
+            sed -i 's/POSTGRES_PASSWORD=[^\n]*/POSTGRES_PASSWORD=${PostgresPassword}/' /root/application/docker_compose/.env
             systemctl start quickstart-teable
           - RegionId:
               Ref: ALIYUN::Region
-Outputs: 
-  teable_address:
+Outputs:
+  访问地址:
     Description:
       en: teable address.
       zh-cn: teable 访问页面。
     Value:
       Fn::Sub:
         - http://${ServerAddress}:3000
-        - ServerAddress:
-            Fn::Select:
-              - 0
-              - Fn::GetAtt:
-                  - InstanceGroup
-                  - PublicIps
-  teable-db_address:
-    Description:
-      en: teable-db address.
-      zh-cn: teable-db 访问页面。
-    Value:
-      Fn::Sub:
-        - http://${ServerAddress}:42345
         - ServerAddress:
             Fn::Select:
               - 0
@@ -368,8 +372,7 @@ Metadata:
         Label:
           default: 可用区配置
       - Parameters:
-          - POSTGRES_PASSWORD
+          - PostgresPassword
         Label:
           en: Software Configuration
           zh-cn: 软件配置
-      
