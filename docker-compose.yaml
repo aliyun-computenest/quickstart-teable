@@ -55,22 +55,6 @@ services:
       teable-db:
         condition: service_healthy
 
-  teable-cache:
-    image: registry.cn-shenzhen.aliyuncs.com/teable/redis:7.2.4
-    restart: always
-    expose:
-      - '6379'
-    volumes:
-      - teable-cache:/data:rw
-    networks:
-      - teable
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
-    healthcheck:
-      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
-      interval: 10s
-      timeout: 3s
-      retries: 3
-
 networks:
   teable:
     name: teable-network
