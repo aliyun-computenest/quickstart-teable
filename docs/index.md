@@ -36,7 +36,7 @@ Teable社区版服务需要对ECS、VPC等资源进行访问和创建操作，�
 
 ## 部署流程
 ### 部署步骤
-1. 单击[部署链接](https://computenest.console.aliyun.com/service/instance/create/default?type=user&ServiceName=Teable 社区版)，进入服务实例部署界面。
+1. 单击[部署链接](https://computenest.console.aliyun.com/service/instance/create/default?type=user&ServiceName=Teable%20%E7%A4%BE%E5%8C%BA%E7%89%88)，进入服务实例部署界面。
 2. 根据界面提示，填写参数完成部署。
    选择资源类型并配置ECS实例密码.
    ![img.png](img.png)
